@@ -173,6 +173,7 @@ class PerformanceLanding extends React.Component<Props, State> {
                 organization={organization}
                 location={location}
                 router={router}
+                keyTransactions={this.state.currentView === 'KEY_TRANSACTIONS'}
               />
               <Table
                 eventView={eventView}

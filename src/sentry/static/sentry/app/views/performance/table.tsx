@@ -59,7 +59,7 @@ type Props = {
   organization: Organization;
   location: Location;
   setError: (msg: string | undefined) => void;
-  keyTransactions?: boolean;
+  keyTransactions: boolean;
 
   projects: Project[];
   loadingProjects: boolean;
