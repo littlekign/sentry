@@ -139,20 +139,21 @@ class DataPrivacyRulesPanel extends React.Component<Props, State> {
     const {organization, project} = this.context;
 
     const queryParams = [
-      ["project", project?.id],
-      ["eventId", this.state.selectedEventId]
+      ['project', project?.id],
+      ['eventId', this.state.selectedEventId],
     ]
-      .filter(([_k, v]) => !!v).map(([k, v]) => `${k}=${v}`)
-      .join("&");
+      .filter(([_k, v]) => !!v)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&');
 
-    let selectorSuggestions: Array<Suggestion> = [];
+    const selectorSuggestions: Array<Suggestion> = [];
 
     const rawSuggestions = await this.api.requestPromise(
       `/organizations/${organization.slug}/data-scrubbing-selector-suggestions/?${queryParams}`,
       {method: 'GET'}
     );
 
-    for(const suggestion of rawSuggestions.suggestions || []) {
+    for (const suggestion of rawSuggestions.suggestions || []) {
       selectorSuggestions.push(suggestion);
     }
 
