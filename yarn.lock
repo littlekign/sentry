@@ -8436,12 +8436,12 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.1.1.tgz#c4b489e80096d9df1dfc97c79871aea7c617c469"
   integrity sha512-zAoAQiudy+r5SvnSw3KJy5os/oRJYHzrzja/tBDqrZtNhUw8bt6y8OBzMWcjWr+8liV8Eb6yOhw8WZ7VFZ5ZzA==
 
-focus-trap@^6.7.1:
-  version "6.7.1"
-  resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-6.7.1.tgz#d474f86dbaf3c7fbf0d53cf0b12295f4f4068d10"
-  integrity sha512-a6czHbT9twVpy2RpkWQA9vIgwQgB9Nx1PIxNNUxQT4nugG/3QibwxO+tWTh9i+zSY2SFiX4pnYhTaFaQF/6ZAg==
+focus-trap@^7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-7.4.0.tgz#20f760a497f593b01d2e446168009c1f12ab0385"
+  integrity sha512-yI7FwUqU4TVb+7t6PaQ3spT/42r/KLEi8mtdGoQo2li/kFzmu9URmalTvw7xCCJtSOyhBxscvEAmvjeN9iHARg==
   dependencies:
-    tabbable "^5.2.1"
+    tabbable "^6.1.1"
 
 focus-visible@^5.2.0:
   version "5.2.0"
@@ -14935,10 +14935,10 @@ symbol.prototype.description@^1.0.0:
     es-abstract "^1.17.0-next.1"
     has-symbols "^1.0.1"
 
-tabbable@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-5.2.1.tgz#e3fda7367ddbb172dcda9f871c0fdb36d1c4cd9c"
-  integrity sha512-40pEZ2mhjaZzK0BnI+QGNjJO8UYx9pP5v7BGe17SORTO0OEuuaAwQTkAp8whcZvqon44wKFOikD+Al11K3JICQ==
+tabbable@^6.1.1:
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-6.1.1.tgz#40cfead5ed11be49043f04436ef924c8890186a0"
+  integrity sha512-4kl5w+nCB44EVRdO0g/UGoOp3vlwgycUVtkk/7DPyeLZUCuNFFKCFG6/t/DgHLrUPHjrZg6s5tNm+56Q2B0xyg==
 
 table@^5.0.2:
   version "5.4.6"
