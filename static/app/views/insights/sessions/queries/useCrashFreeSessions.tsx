@@ -8,6 +8,18 @@ import useSessionAdoptionRate from 'sentry/views/insights/sessions/queries/useSe
 export default function useCrashFreeSessions() {
   const location = useLocation();
   const organization = useOrganization();
+
+  const locationWithoutWidth = {
+    ...location,
+    query: {
+      ...location.query,
+      width_health_table: undefined,
+      width_adoption_table: undefined,
+      cursor_health_table: undefined,
+      cursor_adoption_table: undefined,
+    },
+  };
+
   const {
     data: sessionData,
     isPending,
@@ -17,7 +29,7 @@ export default function useCrashFreeSessions() {
       `/organizations/${organization.slug}/sessions/`,
       {
         query: {
-          ...location.query,
+          ...locationWithoutWidth.query,
           field: ['sum(session)'],
           groupBy: ['session.status', 'release'],
         },
@@ -28,18 +40,10 @@ export default function useCrashFreeSessions() {
 
   const projectTotal = useSessionAdoptionRate();
 
-  if (isPending) {
+  if (isPending || !sessionData) {
     return {
       series: [],
-      isPending: true,
-      error,
-    };
-  }
-
-  if (!sessionData && !isPending) {
-    return {
-      series: [],
-      isPending: false,
+      isPending,
       error,
     };
   }

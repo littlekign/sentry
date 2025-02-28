@@ -205,6 +205,7 @@ export type ComponentHooks = {
   'component:organization-header': () => React.ComponentType<OrganizationHeaderProps>;
   'component:organization-membership-settings': () => React.ComponentType<MembershipSettingsProps>;
   'component:partnership-agreement': React.ComponentType<PartnershipAgreementProps>;
+  'component:performance-quota-exceeded-alert': () => React.ComponentType | null;
   'component:product-selection-availability': () => React.ComponentType<ProductSelectionAvailabilityProps>;
   'component:product-unavailable-cta': () => React.ComponentType<ProductUnavailableCTAProps>;
   'component:profiling-am1-or-mmx-upgrade': () => React.ComponentType<ProfilingAM1OrMMXUpgradeProps>;
@@ -341,6 +342,7 @@ export type ReactHooks = {
   ) => React.ContextType<typeof RouteAnalyticsContext>;
   'react-hook:use-button-tracking': (props: ButtonProps) => () => void;
   'react-hook:use-experiment': UseExperiment;
+  'react-hook:use-get-max-retention-days': () => number | undefined;
 };
 
 /**
