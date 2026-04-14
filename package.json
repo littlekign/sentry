@@ -180,7 +180,7 @@
     "js-cookie": "3.0.5",
     "jsonrepair": "^3.8.0",
     "less": "4.3.0",
-    "less-loader": "^12.2.0",
+    "less-loader": "^12.3.2",
     "lodash": "^4.17.23",
     "marked": "17.0.4",
     "marked-highlight": "2.2.3",
