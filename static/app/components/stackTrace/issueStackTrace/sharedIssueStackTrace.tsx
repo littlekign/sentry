@@ -6,14 +6,6 @@ import {Separator} from '@sentry/scraps/separator';
 import {Text} from '@sentry/scraps/text';
 
 import {CopyAsDropdown} from 'sentry/components/copyAsDropdown';
-import {ErrorBoundary} from 'sentry/components/errorBoundary';
-import {StacktraceBanners} from 'sentry/components/events/interfaces/crashContent/exception/banners/stacktraceBanners';
-import {
-  LineCoverageProvider,
-  useLineCoverageContext,
-} from 'sentry/components/events/interfaces/crashContent/exception/lineCoverageContext';
-import {LineCoverageLegend} from 'sentry/components/events/interfaces/crashContent/exception/lineCoverageLegend';
-import {SuspectCommits} from 'sentry/components/events/suspectCommits';
 import {Panel} from 'sentry/components/panels/panel';
 import {DisplayOptions} from 'sentry/components/stackTrace/displayOptions';
 import {
@@ -25,6 +17,7 @@ import {
   ExceptionDescription,
   ExceptionHeader,
 } from 'sentry/components/stackTrace/exceptionHeader';
+import {FrameContent} from 'sentry/components/stackTrace/frame/frameContent';
 import {RawStackTraceText} from 'sentry/components/stackTrace/rawStackTrace';
 import {
   StackTraceViewStateProvider,
@@ -32,19 +25,14 @@ import {
 } from 'sentry/components/stackTrace/stackTraceContext';
 import {StackTraceFrames} from 'sentry/components/stackTrace/stackTraceFrames';
 import {StackTraceProvider} from 'sentry/components/stackTrace/stackTraceProvider';
-import {t, tn} from 'sentry/locale';
+import {tn} from 'sentry/locale';
 import type {Event, ExceptionValue} from 'sentry/types/event';
 import {EntryType} from 'sentry/types/event';
-import type {Group} from 'sentry/types/group';
-import type {Project} from 'sentry/types/project';
 import type {StacktraceType} from 'sentry/types/stacktrace';
 import {defined} from 'sentry/utils';
-import {useOrganization} from 'sentry/utils/useOrganization';
 import {SectionKey} from 'sentry/views/issueDetails/streamline/context';
 import {InterimSection} from 'sentry/views/issueDetails/streamline/interimSection';
 
-import {IssueFrameActions} from './issueFrameActions';
-import {IssueStackTraceFrameContext} from './issueStackTraceFrameContext';
 import {
   formatExceptionsAsText,
   getExceptionEntryMeta,
@@ -52,38 +40,43 @@ import {
   resolveExceptionFields,
 } from './utils';
 
-interface IssueStackTraceBaseProps {
+interface SharedIssueStackTraceBaseProps {
   event: Event;
-  group?: Group;
-  projectSlug?: Project['slug'];
 }
 
-/** Exception stack traces with chaining, type/value metadata, and minified variants. */
-interface ExceptionStackTraceProps extends IssueStackTraceBaseProps {
+interface SharedExceptionStackTraceProps extends SharedIssueStackTraceBaseProps {
   values: ExceptionValue[];
   stacktrace?: never;
 }
 
-/** Bare stack trace with no exception metadata (e.g. log/message events). */
-interface StandaloneStackTraceProps extends IssueStackTraceBaseProps {
+interface SharedStandaloneStackTraceProps extends SharedIssueStackTraceBaseProps {
   stacktrace: StacktraceType;
   values?: never;
 }
 
-type IssueStackTraceProps = ExceptionStackTraceProps | StandaloneStackTraceProps;
+type SharedIssueStackTraceProps =
+  | SharedExceptionStackTraceProps
+  | SharedStandaloneStackTraceProps;
 
-function IssueStackTraceLineCoverageLegend() {
-  const {hasCoverageData} = useLineCoverageContext();
-
-  if (!hasCoverageData) {
-    return null;
-  }
-
-  return <LineCoverageLegend />;
-}
-
-export function IssueStackTrace(props: IssueStackTraceProps) {
-  const {event, group, projectSlug} = props;
+/**
+ * Stack trace component for the shared issue page.
+ *
+ * Renders the full exception experience (headers, chaining, display options,
+ * raw view, copy-as) without making any authenticated API requests.
+ *
+ * The shared issue page is viewed by unauthenticated users, so this component
+ * intentionally avoids the following from {@link IssueStackTrace}:
+ * - {@link IssueFrameActions}: calls stacktrace-link and source-map-debug APIs
+ * - {@link IssueStackTraceFrameContext}: calls stacktrace-coverage API (Codecov)
+ * - {@link StacktraceBanners}: depends on authenticated project context
+ * - {@link SuspectCommits}: requires group and project data
+ * - {@link LineCoverageProvider}: no coverage data without auth
+ *
+ * Uses {@link DefaultFrameActions} and {@link FrameContent} instead, which
+ * render entirely from local event data.
+ */
+export function SharedIssueStackTrace(props: SharedIssueStackTraceProps) {
+  const {event} = props;
   const eventHasThreads = event.entries?.some(entry => entry.type === EntryType.THREADS);
   if (eventHasThreads) {
     return null;
@@ -115,33 +108,29 @@ export function IssueStackTrace(props: IssueStackTraceProps) {
     !isStandalone && values.some(v => v.rawStacktrace !== null);
 
   return (
-    <LineCoverageProvider>
-      <StackTraceViewStateProvider
-        platform={event.platform}
-        hasMinifiedStacktrace={hasMinifiedStacktrace}
-      >
-        <IssueStackTraceContent
-          event={event}
-          values={values}
-          group={group}
-          projectSlug={projectSlug}
-          isStandalone={isStandalone}
-        />
-      </StackTraceViewStateProvider>
-    </LineCoverageProvider>
+    <StackTraceViewStateProvider
+      platform={event.platform}
+      hasMinifiedStacktrace={hasMinifiedStacktrace}
+    >
+      <SharedIssueStackTraceContent
+        event={event}
+        values={values}
+        isStandalone={isStandalone}
+      />
+    </StackTraceViewStateProvider>
   );
 }
 
-function IssueStackTraceContent({
+function SharedIssueStackTraceContent({
   event,
   values,
-  group,
-  projectSlug,
   isStandalone,
-}: IssueStackTraceBaseProps & {isStandalone: boolean; values: ExceptionValue[]}) {
+}: {
+  event: Event;
+  isStandalone: boolean;
+  values: ExceptionValue[];
+}) {
   const {isMinified, isNewestFirst, view} = useStackTraceViewState();
-  const organization = useOrganization();
-  const hasScmSourceContext = organization.features.includes('scm-source-context');
   const {hiddenExceptions, toggleRelatedExceptions, expandException} =
     useHiddenExceptions(values);
 
@@ -161,8 +150,6 @@ function IssueStackTraceContent({
     return null;
   }
 
-  const sectionKey = isStandalone ? SectionKey.STACKTRACE : SectionKey.EXCEPTION;
-
   const copyItems = CopyAsDropdown.makeDefaultCopyAsOptions({
     text: () =>
       formatExceptionsAsText({
@@ -175,6 +162,8 @@ function IssueStackTraceContent({
     markdown: undefined,
   });
 
+  const sectionKey = isStandalone ? SectionKey.STACKTRACE : SectionKey.EXCEPTION;
+
   const sectionActions = (
     <Flex align="center" gap="sm">
       <DisplayOptions />
@@ -185,23 +174,16 @@ function IssueStackTraceContent({
   if (view === 'raw') {
     return (
       <InterimSection type={sectionKey} title="Stack Trace" actions={sectionActions}>
-        <Flex direction="column" gap="lg">
-          <Panel>
-            <RawStackTraceText>
-              {formatExceptionsAsText({
-                exceptions,
-                platform: event.platform,
-                isMinified,
-                isStandalone,
-              })}
-            </RawStackTraceText>
-          </Panel>
-          <IssueStackTraceSuspectCommits
-            event={event}
-            group={group}
-            projectSlug={projectSlug}
-          />
-        </Flex>
+        <Panel>
+          <RawStackTraceText>
+            {formatExceptionsAsText({
+              exceptions,
+              platform: event.platform,
+              isMinified,
+              isStandalone,
+            })}
+          </RawStackTraceText>
+        </Panel>
       </InterimSection>
     );
   }
@@ -210,48 +192,32 @@ function IssueStackTraceContent({
     const exc = exceptions[0]!;
     const {type, module, value} = resolveExceptionFields(exc, isMinified);
     const hasExceptionInfo = Boolean(type || value);
-
     const excMeta = exceptionValuesMeta?.[exc.exceptionIndex];
 
     return (
       <InterimSection type={sectionKey} title="Stack Trace" actions={sectionActions}>
         <Flex direction="column" gap="lg">
-          <Flex direction="column" gap="sm">
-            {hasExceptionInfo && (
-              <Fragment>
-                <div>
-                  <ExceptionHeader type={type} module={module} />
-                </div>
-                <ExceptionDescription
-                  value={value}
-                  mechanism={exc.mechanism}
-                  meta={excMeta}
-                />
-              </Fragment>
-            )}
-            <IssueStackTraceLineCoverageLegend />
-          </Flex>
-          <ErrorBoundary customComponent={null}>
-            <StacktraceBanners event={event} stacktrace={exc.stacktrace} />
-          </ErrorBoundary>
+          {hasExceptionInfo && (
+            <Fragment>
+              <div>
+                <ExceptionHeader type={type} module={module} />
+              </div>
+              <ExceptionDescription
+                value={value}
+                mechanism={exc.mechanism}
+                meta={excMeta}
+              />
+            </Fragment>
+          )}
           <StackTraceProvider
             exceptionIndex={isStandalone ? undefined : exc.exceptionIndex}
             event={event}
-            hasScmSourceContext={hasScmSourceContext}
             stacktrace={exc.stacktrace}
             minifiedStacktrace={exc.rawStacktrace ?? undefined}
             meta={isStandalone ? rawEntryMeta : excMeta?.stacktrace}
           >
-            <StackTraceFrames
-              frameContextComponent={IssueStackTraceFrameContext}
-              frameActionsComponent={IssueFrameActions}
-            />
+            <StackTraceFrames frameContextComponent={FrameContent} />
           </StackTraceProvider>
-          <IssueStackTraceSuspectCommits
-            event={event}
-            group={group}
-            projectSlug={projectSlug}
-          />
         </Flex>
       </InterimSection>
     );
@@ -268,7 +234,6 @@ function IssueStackTraceContent({
           )}
         </Text>
         <Separator orientation="horizontal" border="primary" />
-        <IssueStackTraceLineCoverageLegend />
         {exceptions.map((exc, idx) => {
           if (
             exc.mechanism?.parent_id !== undefined &&
@@ -316,51 +281,21 @@ function IssueStackTraceContent({
                     newestFirst={isNewestFirst}
                     onExceptionClick={expandException}
                   />
-                  {idx === firstVisibleExceptionIndex ? (
-                    <ErrorBoundary customComponent={null}>
-                      <StacktraceBanners event={event} stacktrace={exc.stacktrace} />
-                    </ErrorBoundary>
-                  ) : null}
                   <StackTraceProvider
                     exceptionIndex={exc.exceptionIndex}
                     event={event}
-                    hasScmSourceContext={hasScmSourceContext}
                     stacktrace={exc.stacktrace}
                     minifiedStacktrace={exc.rawStacktrace ?? undefined}
                     meta={exceptionValuesMeta?.[exc.exceptionIndex]?.stacktrace}
                   >
-                    <StackTraceFrames
-                      frameContextComponent={IssueStackTraceFrameContext}
-                      frameActionsComponent={IssueFrameActions}
-                    />
+                    <StackTraceFrames frameContextComponent={FrameContent} />
                   </StackTraceProvider>
                 </Flex>
               </Disclosure.Content>
             </Disclosure>
           );
         })}
-        <IssueStackTraceSuspectCommits
-          event={event}
-          group={group}
-          projectSlug={projectSlug}
-        />
       </Flex>
     </InterimSection>
-  );
-}
-
-function IssueStackTraceSuspectCommits({
-  event,
-  group,
-  projectSlug,
-}: IssueStackTraceBaseProps) {
-  if (!group || !projectSlug) {
-    return null;
-  }
-
-  return (
-    <ErrorBoundary mini message={t('There was an error loading suspect commits')}>
-      <SuspectCommits projectSlug={projectSlug} eventId={event.id} group={group} />
-    </ErrorBoundary>
   );
 }
