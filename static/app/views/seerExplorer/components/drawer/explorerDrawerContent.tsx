@@ -4,6 +4,8 @@ import styled from '@emotion/styled';
 import {useDrawer} from '@sentry/scraps/drawer';
 import {Stack} from '@sentry/scraps/layout';
 
+import {addErrorMessage, addSuccessMessage} from 'sentry/actionCreators/indicator';
+import {trackAnalytics} from 'sentry/utils/analytics';
 import {useFeedbackForm} from 'sentry/utils/useFeedbackForm';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {useProjects} from 'sentry/utils/useProjects';
@@ -23,8 +25,10 @@ import {useSeerExplorer} from 'sentry/views/seerExplorer/hooks/useSeerExplorer';
 import type {Block} from 'sentry/views/seerExplorer/types';
 import {
   getExplorerFeedbackOptions,
+  getExplorerUrl,
   getLangfuseUrl,
   useCopySessionDataToClipboard,
+  useSeerExplorerDeepLink,
 } from 'sentry/views/seerExplorer/utils';
 
 export function ExplorerDrawerContent({
@@ -121,7 +125,7 @@ export function ExplorerDrawerContent({
   });
 
   // - Topbar, menu, and slash command handlers -------------------------------
-  const copySessionEnabled = Boolean(runId && organization?.slug);
+  const copySessionEnabled = runId !== null && !!organization?.slug;
   const {copySessionToClipboard} = useCopySessionDataToClipboard({
     blocks: sessionData?.blocks,
     status: sessionData?.status,
@@ -129,6 +133,18 @@ export function ExplorerDrawerContent({
     projects,
     enabled: copySessionEnabled,
   });
+
+  const handleCopyLink = useCallback(async () => {
+    if (runId === null) return;
+    try {
+      const url = getExplorerUrl(runId);
+      await navigator.clipboard.writeText(url);
+      addSuccessMessage('Copied link to current chat');
+      trackAnalytics('seer.explorer.session_link_copied', {organization});
+    } catch {
+      addErrorMessage('Failed to copy link to current chat');
+    }
+  }, [runId, organization]);
 
   const langfuseUrl = runId ? getLangfuseUrl(runId) : undefined;
   const conversationsUrl = runId ? getConversationsUrl('sentry', runId) : undefined;
@@ -290,7 +306,7 @@ export function ExplorerDrawerContent({
     blockRefs.current = blockRefs.current.slice(0, blocks.length);
   }, [blocks]);
 
-  // Block keyboard navigation
+  // Block keyboard listeners
   useBlockNavigation({
     isOpen: true, // Drawer content is always visible when rendered
     isMinimized: false,
@@ -310,6 +326,9 @@ export function ExplorerDrawerContent({
     },
   });
 
+  // - Deep link effect -------------------------------------------------------
+  useSeerExplorerDeepLink({callback: switchToRun});
+
   return (
     <DrawerContentContainer data-seer-explorer-root="">
       <ExplorerDrawerHeader
@@ -318,9 +337,9 @@ export function ExplorerDrawerContent({
           focusInput();
         }}
         onChangeSession={switchToRun}
-        copySessionEnabled={copySessionEnabled}
         isEmptyState={isEmptyState}
-        onCopySessionClick={copySessionToClipboard}
+        onCopySessionClick={copySessionEnabled ? copySessionToClipboard : undefined}
+        onCopyLinkClick={runId === null ? undefined : handleCopyLink}
         overrideCtxEngEnable={overrideCtxEngEnable}
         onOverrideCtxEngEnableToggle={() => setOverrideCtxEngEnable(v => !v)}
         showContextEngineToggle={

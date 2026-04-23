@@ -11,17 +11,17 @@ import {Tooltip} from '@sentry/scraps/tooltip';
 
 import {DropdownMenu, type MenuItemProps} from 'sentry/components/dropdownMenu';
 import {TimeSince} from 'sentry/components/timeSince';
-import {IconAdd, IconClock, IconCopy} from 'sentry/icons';
+import {IconAdd, IconClock, IconCopy, IconLink} from 'sentry/icons';
 import {t} from 'sentry/locale';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {useExplorerSessions} from 'sentry/views/seerExplorer/hooks/useExplorerSessions';
 import {isSeerExplorerEnabled} from 'sentry/views/seerExplorer/utils';
 
 interface ExplorerDrawerHeaderProps {
-  copySessionEnabled: boolean;
   isEmptyState: boolean;
   onChangeSession: (runId: number) => void;
-  onCopySessionClick: () => void;
+  onCopyLinkClick: (() => void) | undefined;
+  onCopySessionClick: (() => void) | undefined;
   onNewChatClick: () => void;
   onOverrideCodeModeEnableToggle: () => void;
   onOverrideCtxEngEnableToggle: () => void;
@@ -32,11 +32,11 @@ interface ExplorerDrawerHeaderProps {
 }
 
 export function ExplorerDrawerHeader({
+  isEmptyState,
   onNewChatClick,
   onChangeSession,
-  copySessionEnabled,
-  isEmptyState,
   onCopySessionClick,
+  onCopyLinkClick,
   showContextEngineToggle,
   overrideCtxEngEnable,
   onOverrideCtxEngEnableToggle,
@@ -153,11 +153,20 @@ export function ExplorerDrawerHeader({
         <Button
           icon={<IconCopy />}
           onClick={onCopySessionClick}
-          disabled={!copySessionEnabled}
+          disabled={!onCopySessionClick}
           priority="default"
           size="xs"
           aria-label={t('Copy conversation to clipboard')}
           tooltipProps={{title: t('Copy conversation to clipboard')}}
+        />
+        <Button
+          icon={<IconLink />}
+          onClick={onCopyLinkClick}
+          disabled={!onCopyLinkClick}
+          priority="default"
+          size="xs"
+          aria-label={t('Copy link to current chat and web page')}
+          tooltipProps={{title: t('Copy link to current chat and web page')}}
         />
         <DropdownMenu
           items={sessionMenuItems}
