@@ -5,7 +5,7 @@ import * as qs from 'query-string';
 import {Stack} from '@sentry/scraps/layout';
 
 import {LoadingIndicator} from 'sentry/components/loadingIndicator';
-import {Flamegraph} from 'sentry/components/profiling/flamegraph/flamegraph';
+import {ContinuousFlamegraph} from 'sentry/components/profiling/flamegraph/continuousFlamegraph';
 import {SentryDocumentTitle} from 'sentry/components/sentryDocumentTitle';
 import {t} from 'sentry/locale';
 import type {DeepPartial} from 'sentry/types/utils';
@@ -25,11 +25,11 @@ import {useCurrentProjectFromRouteParam} from 'sentry/utils/profiling/hooks/useC
 import {useLocalStorageState} from 'sentry/utils/useLocalStorageState';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {useParams} from 'sentry/utils/useParams';
-import {ProfileGroupProvider} from 'sentry/views/profiling/profileGroupProvider';
+import {ProfileGroupProvider} from 'sentry/views/explore/profiling/profileGroupProvider';
 
-import {useProfiles, useProfileTransaction} from './profilesProvider';
+import {useProfiles} from './profilesProvider';
 
-function ProfileFlamegraph(): React.ReactElement {
+function ContinuousProfileFlamegraph(): React.ReactElement {
   const organization = useOrganization();
 
   const {colorCoding, sorting, view} = useFlamegraphPreferences();
@@ -54,13 +54,12 @@ function ProfileFlamegraph(): React.ReactElement {
     initial.current = false;
   }, [organization, currentProject?.platform, colorCoding, sorting, view]);
 
-  return <Flamegraph />;
+  return <ContinuousFlamegraph />;
 }
 
-export default function ProfileFlamegraphWrapper() {
+export default function ContinuousProfileFlamegraphWrapper() {
   const organization = useOrganization();
   const profiles = useProfiles();
-  const profiledTransaction = useProfileTransaction();
   const params = useParams();
 
   const [storedPreferences] = useLocalStorageState<DeepPartial<FlamegraphState>>(
@@ -113,12 +112,12 @@ export default function ProfileFlamegraphWrapper() {
             <FlamegraphStateQueryParamSync />
             <FlamegraphStateLocalStorageSync />
             <FlamegraphContainer>
-              {profiles.type === 'loading' || profiledTransaction.type === 'loading' ? (
+              {profiles.type === 'loading' ? (
                 <Stack justify="center" width="100%" height="100%" position="absolute">
                   <LoadingIndicator />
                 </Stack>
               ) : null}
-              <ProfileFlamegraph />
+              <ContinuousProfileFlamegraph />
             </FlamegraphContainer>
           </FlamegraphThemeProvider>
         </ProfileGroupTypeProvider>

@@ -19,10 +19,13 @@ import {useReplayOnboardingSidebarPanel} from 'sentry/utils/replays/hooks/useRep
 import {useCanCreateProject} from 'sentry/utils/useCanCreateProject';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {useProjects} from 'sentry/utils/useProjects';
+import {
+  HeaderContainer,
+  WidgetContainer,
+} from 'sentry/views/explore/profiling/landing/styles';
 import {useAllMobileProj} from 'sentry/views/explore/replays/detail/useAllMobileProj';
 import {ReplayPanel} from 'sentry/views/explore/replays/list/replayPanel';
 import {useSecondaryNavigation} from 'sentry/views/navigation/secondaryNavigationContext';
-import {HeaderContainer, WidgetContainer} from 'sentry/views/profiling/landing/styles';
 import {makeProjectsPathname} from 'sentry/views/projects/pathname';
 
 type Breakpoints = {
