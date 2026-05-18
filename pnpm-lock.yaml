@@ -408,8 +408,8 @@ importers:
         specifier: 4.3.0
         version: 4.3.0
       less-loader:
-        specifier: ^12.2.0
-        version: 12.2.0(@rspack/core@1.7.6)(less@4.3.0)(webpack@5.99.6(@swc/core@1.15.24)(esbuild@0.25.10))
+        specifier: ^12.3.2
+        version: 12.3.2(@rspack/core@1.7.6)(less@4.3.0)(webpack@5.99.6(@swc/core@1.15.24)(esbuild@0.25.10))
       lodash:
         specifier: ^4.17.23
         version: 4.17.23
@@ -6783,11 +6783,11 @@ packages:
   launch-editor@2.12.0:
     resolution: {integrity: sha512-giOHXoOtifjdHqUamwKq6c49GzBdLjvxrd2D+Q4V6uOHopJv7p9VJxikDsQ/CBXZbEITgUqSVHXLTG3VhPP1Dg==}
 
-  less-loader@12.2.0:
-    resolution: {integrity: sha512-MYUxjSQSBUQmowc0l5nPieOYwMzGPUaTzB6inNW/bdPEG9zOL3eAAD1Qw5ZxSPk7we5dMojHwNODYMV1hq4EVg==}
+  less-loader@12.3.2:
+    resolution: {integrity: sha512-uLV5c702ff2jBvO7qewpkLRzkh/I9QW07ur2NKkv8TVTrtX2lrKjEbEU/LLXAn7cgpCIBbkfyUm4qYXCQs5/+w==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
-      '@rspack/core': 0.x || 1.x
+      '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
       less: ^3.5.0 || ^4.0.0
       webpack: ^5.0.0
     peerDependenciesMeta:
@@ -16654,7 +16654,7 @@ snapshots:
       picocolors: 1.1.1
       shell-quote: 1.8.3
 
-  less-loader@12.2.0(@rspack/core@1.7.6)(less@4.3.0)(webpack@5.99.6(@swc/core@1.15.24)(esbuild@0.25.10)):
+  less-loader@12.3.2(@rspack/core@1.7.6)(less@4.3.0)(webpack@5.99.6(@swc/core@1.15.24)(esbuild@0.25.10)):
     dependencies:
       less: 4.3.0
     optionalDependencies:
