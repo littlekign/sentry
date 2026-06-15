@@ -21,7 +21,7 @@ import type {
 import type {WidgetType} from 'sentry/views/dashboards/types';
 import type {AutofixContentProps} from 'sentry/views/issueDetails/sidebar/autofixSectionTypes';
 import type {UseScmFeatureMetaResult} from 'sentry/views/onboarding/components/useScmFeatureMeta';
-import type {OrganizationStatsProps} from 'sentry/views/organizationStats';
+import type {OrganizationStatsProps} from 'sentry/views/organizationStats/types';
 import type {RouteAnalyticsContext} from 'sentry/views/routeAnalyticsContextProvider';
 import type {NavigationSection} from 'sentry/views/settings/types';
 
