@@ -11,7 +11,6 @@ import {Heading} from '@sentry/scraps/text';
 
 import {addSuccessMessage} from 'sentry/actionCreators/indicator';
 import {openModal, type ModalRenderProps} from 'sentry/actionCreators/modal';
-import type {RequestOptions} from 'sentry/api';
 import {BackendJsonSubmitForm} from 'sentry/components/backendJsonFormAdapter/backendJsonSubmitForm';
 import type {JsonFormAdapterFieldConfig} from 'sentry/components/backendJsonFormAdapter/types';
 import {useDynamicFields} from 'sentry/components/externalIssues/useDynamicFields';
@@ -21,7 +20,6 @@ import type {FieldValue} from 'sentry/components/forms/types';
 import {LoadingError} from 'sentry/components/loadingError';
 import {LoadingIndicator} from 'sentry/components/loadingIndicator';
 import {t, tct} from 'sentry/locale';
-import type {ResponseMeta} from 'sentry/types/api';
 import type {Choice, Choices} from 'sentry/types/core';
 import type {Group} from 'sentry/types/group';
 import type {
@@ -196,40 +194,35 @@ export function ExternalIssueForm({
    * `useApiQuery`, and instead manually call the api, and update the cache ourselves.
    */
   const refetchWithDynamicFields = useCallback(
-    (dynamicValues: Record<string, unknown>) => {
+    async (dynamicValues: Record<string, unknown>) => {
       setIsDynamicallyRefetching(true);
-      const requestOptions: RequestOptions = {
-        method: 'GET',
-        query: {action, ...dynamicValues},
-        success: (
-          data: IntegrationIssueConfig,
-          _textStatus: string | undefined,
-          _responseMeta: ResponseMeta | undefined
-        ) => {
-          setApiQueryData(
-            queryClient,
-            makeIntegrationIssueConfigQueryKey({
-              orgSlug: organization.slug,
-              groupId: group.id,
-              integrationId: integration.id,
-              action,
-            }),
-            existingData => (data ? data : existingData)
-          );
-          setIsDynamicallyRefetching(false);
-        },
-        error: (err: any) => {
-          if (err?.responseText) {
-            Sentry.addBreadcrumb({
-              message: err.responseText,
-              category: 'xhr',
-              level: 'error',
-            });
-          }
-          setIsDynamicallyRefetching(false);
-        },
-      };
-      return api.request(endpointString, requestOptions);
+      try {
+        const [data] = await api.requestPromise(endpointString, {
+          method: 'GET',
+          query: {action, ...dynamicValues},
+          includeAllArgs: true,
+        });
+        setApiQueryData(
+          queryClient,
+          makeIntegrationIssueConfigQueryKey({
+            orgSlug: organization.slug,
+            groupId: group.id,
+            integrationId: integration.id,
+            action,
+          }),
+          existingData => (data ? (data as IntegrationIssueConfig) : existingData)
+        );
+      } catch (err: any) {
+        if (err?.responseText) {
+          Sentry.addBreadcrumb({
+            message: err.responseText,
+            category: 'xhr',
+            level: 'error',
+          });
+        }
+      } finally {
+        setIsDynamicallyRefetching(false);
+      }
     },
     [
       action,
