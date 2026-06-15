@@ -3028,6 +3028,11 @@ register(
     default=[],
     flags=FLAG_ALLOW_EMPTY | FLAG_AUTOMATOR_MODIFIABLE,
 )
+register(
+    "spans.buffer.use-msgspec-decoder",
+    default=0.0,
+    flags=FLAG_PRIORITIZE_DISK | FLAG_AUTOMATOR_MODIFIABLE,
+)
 # Segments consumer
 register(
     "spans.process-segments.consumer.enable",
