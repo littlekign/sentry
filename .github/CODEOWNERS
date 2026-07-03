@@ -376,6 +376,7 @@ tests/sentry/api/endpoints/test_organization_attribute_mappings.py          @get
 
 ## Data Browsing Migration Tests
 /tests/sentry/migrations/test_1125_transactions_to_spans_alerts_self_hosted.py @getsentry/data-browsing
+/tests/sentry/migrations/test_1126_transactions_to_spans_widgets_self_hosted.py @getsentry/data-browsing
 ## End of Data Browsing Migration Tests
 
 
