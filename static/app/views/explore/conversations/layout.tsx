@@ -97,10 +97,18 @@ function ConversationsHeader() {
   const restoredListQuery = useRestoredListQuery(conversationId, location.state);
 
   const backToListCrumb = restoredListQuery
-    ? {pathname: conversationsBaseUrl, query: restoredListQuery}
+    ? {
+        pathname: conversationsBaseUrl,
+        query: {...restoredListQuery, referrer: 'conversations-breadcrumb'},
+      }
     : {
         pathname: conversationsBaseUrl,
-        query: {statsPeriod: '24h', start: undefined, end: undefined},
+        query: {
+          statsPeriod: '24h',
+          start: undefined,
+          end: undefined,
+          referrer: 'conversations-breadcrumb',
+        },
       };
 
   return (
