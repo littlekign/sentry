@@ -4,6 +4,8 @@ import * as Sentry from '@sentry/react';
 import {useFrontendVersion} from 'sentry/components/frontendVersionContext';
 import {ServiceWorkerController} from 'sentry/serviceWorker/client/serviceWorkerInterface';
 
+const supportsServiceWorker = 'serviceWorker' in navigator;
+
 const DEBUG_LOGGING = false;
 
 function log(message: string, options?: Sentry.metrics.MetricOptions) {
@@ -34,7 +36,8 @@ export function ServiceWorkerProvider({children}: {children: React.ReactNode}) {
 
 /**
  * @public
- * @returns The service worker context.
+ * Use the service worker controller to send messages to the service worker.
+ *
  * @example
  * const {controller} = useServiceWorker();
  * controller.postMessage({name: 'ping', type: 'event'});
@@ -49,7 +52,7 @@ export function useServiceWorker() {
  */
 function useRegisterServiceWorker() {
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) {
+    if (!supportsServiceWorker) {
       log('not-supported');
       return;
     }
@@ -89,7 +92,7 @@ function useServiceWorkerUpdateCheck() {
   const {state} = useFrontendVersion();
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator) || state === 'current') {
+    if (!supportsServiceWorker || state === 'current') {
       return;
     }
 
@@ -118,7 +121,7 @@ function useServiceWorkerUpdateCheck() {
 
 function useLogControllerChangeEvent() {
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) {
+    if (!supportsServiceWorker) {
       return;
     }
 
