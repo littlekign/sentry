@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/react';
 
+import {isServiceWorkerSupported} from 'sentry/serviceWorker/client/isServiceWorkerSupported';
 import type {EventMessage, RequestMessage} from 'sentry/serviceWorker/types';
 
 type RequestCallback = (error: unknown, result: unknown) => void;
-
-const supportsServiceWorker = 'serviceWorker' in navigator;
 
 /**
  * Sends messages from the page to the service worker.
@@ -17,14 +16,14 @@ export class ServiceWorkerController {
   _outstandingRequests = new Map<string, RequestCallback>();
 
   constructor() {
-    if (!supportsServiceWorker) {
+    if (!isServiceWorkerSupported()) {
       return;
     }
     navigator.serviceWorker.addEventListener('message', this._onMessage);
   }
 
   public dispose() {
-    if (!supportsServiceWorker) {
+    if (!isServiceWorkerSupported()) {
       return;
     }
     navigator.serviceWorker.removeEventListener('message', this._onMessage);
@@ -61,7 +60,7 @@ export class ServiceWorkerController {
    * We don't need to wait for the page to be controlled by the worker.
    */
   private async getWorker(): Promise<ServiceWorker | null> {
-    if (!supportsServiceWorker) {
+    if (!isServiceWorkerSupported()) {
       throw new Error('Service workers are not supported in this browser');
     }
     // For more read: https://web.dev/articles/service-worker-lifecycle

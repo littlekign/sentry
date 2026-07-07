@@ -2,9 +2,8 @@ import {createContext, useContext, useEffect} from 'react';
 import * as Sentry from '@sentry/react';
 
 import {useFrontendVersion} from 'sentry/components/frontendVersionContext';
+import {isServiceWorkerSupported} from 'sentry/serviceWorker/client/isServiceWorkerSupported';
 import {ServiceWorkerController} from 'sentry/serviceWorker/client/serviceWorkerInterface';
-
-const supportsServiceWorker = 'serviceWorker' in navigator;
 
 const DEBUG_LOGGING = false;
 
@@ -52,7 +51,7 @@ export function useServiceWorker() {
  */
 function useRegisterServiceWorker() {
   useEffect(() => {
-    if (!supportsServiceWorker) {
+    if (!isServiceWorkerSupported()) {
       log('not-supported');
       return;
     }
@@ -92,7 +91,7 @@ function useServiceWorkerUpdateCheck() {
   const {state} = useFrontendVersion();
 
   useEffect(() => {
-    if (!supportsServiceWorker || state === 'current') {
+    if (!isServiceWorkerSupported() || state === 'current') {
       return;
     }
 
@@ -121,7 +120,7 @@ function useServiceWorkerUpdateCheck() {
 
 function useLogControllerChangeEvent() {
   useEffect(() => {
-    if (!supportsServiceWorker) {
+    if (!isServiceWorkerSupported()) {
       return;
     }
 
