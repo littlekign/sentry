@@ -303,14 +303,15 @@ function InputTab({
           <TraceDrawerComponents.MultilineTextLabel>
             {capitalize(message.role)}
           </TraceDrawerComponents.MultilineTextLabel>
-          <MessageContent content={message.content} />
+          {/* System prompts are usually long, repetitive, and sit on top, so keep them clipped */}
+          <MessageContent content={message.content} clip={message.role === 'system'} />
         </Fragment>
       ))}
       {toolArgs ? (
         <TraceDrawerComponents.MultilineJSON value={toolArgs} maxDefaultDepth={1} />
       ) : null}
       {embeddingsInput ? (
-        <TraceDrawerComponents.MultilineText>
+        <TraceDrawerComponents.MultilineText clip={false}>
           {embeddingsInput.toString()}
         </TraceDrawerComponents.MultilineText>
       ) : null}
@@ -349,7 +350,7 @@ function OutputTab({
           <TraceDrawerComponents.MultilineTextLabel>
             {t('Response')}
           </TraceDrawerComponents.MultilineTextLabel>
-          <AIContentRenderer text={responseText} />
+          <AIContentRenderer text={responseText} clip={false} />
         </Fragment>
       ) : null}
       {responseObject ? (
@@ -357,7 +358,7 @@ function OutputTab({
           <TraceDrawerComponents.MultilineTextLabel>
             {t('Response Object')}
           </TraceDrawerComponents.MultilineTextLabel>
-          <AIContentRenderer text={responseObject} />
+          <AIContentRenderer text={responseObject} clip={false} />
         </Fragment>
       ) : null}
       {toolCalls ? (
@@ -375,11 +376,15 @@ function OutputTab({
   );
 }
 
-function MessageContent({content}: {content: unknown}) {
+function MessageContent({content, clip = false}: {content: unknown; clip?: boolean}) {
   return typeof content === 'string' ? (
-    <AIContentRenderer text={content} />
+    <AIContentRenderer text={content} clip={clip} />
   ) : (
-    <TraceDrawerComponents.MultilineJSON value={content} maxDefaultDepth={2} />
+    <TraceDrawerComponents.MultilineJSON
+      value={content}
+      maxDefaultDepth={2}
+      clip={clip}
+    />
   );
 }
 
