@@ -36,6 +36,7 @@ interface MessagesPanelNewProps {
   nodes: AITraceSpanNode[];
   onSelectNode: (node: AITraceSpanNode) => void;
   selectedNodeId: string | null;
+  isLoading?: boolean;
 }
 
 /**
@@ -48,6 +49,7 @@ export function MessagesPanelNew({
   selectedNodeId,
   onSelectNode,
   nodeTraceMap,
+  isLoading,
 }: MessagesPanelNewProps) {
   const organization = useOrganization();
   const messages = useMemo(() => extractMessagesFromNodes(nodes), [nodes]);
@@ -79,6 +81,10 @@ export function MessagesPanelNew({
       onSelectNode(node);
     }
   };
+
+  if (isLoading) {
+    return <MessagesPanelSkeleton />;
+  }
 
   if (messages.length === 0) {
     return (

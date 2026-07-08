@@ -8,6 +8,7 @@ import {Text} from '@sentry/scraps/text';
 import {Tooltip} from '@sentry/scraps/tooltip';
 
 import {Count} from 'sentry/components/count';
+import {Placeholder} from 'sentry/components/placeholder';
 import {IconFire} from 'sentry/icons';
 import {t} from 'sentry/locale';
 import {formatBytesBase10} from 'sentry/utils/bytes/formatBytesBase10';
@@ -50,11 +51,13 @@ export function AiSpanTimeline({
   onSelectNode,
   nodeTraceMap,
   compressGaps = false,
+  isLoading = false,
 }: {
   nodes: AITraceSpanNode[];
   onSelectNode: (node: AITraceSpanNode) => void;
   selectedNodeKey: string | null;
   compressGaps?: boolean;
+  isLoading?: boolean;
   nodeTraceMap?: Map<string, string>;
 }) {
   const compressedBounds = useMemo(
@@ -80,6 +83,10 @@ export function AiSpanTimeline({
     return parents;
   }, [nodes]);
 
+  if (isLoading) {
+    return <TimelineSkeleton />;
+  }
+
   return (
     <Stack gap="xs">
       {nodes.map(node => {
@@ -98,6 +105,51 @@ export function AiSpanTimeline({
           />
         );
       })}
+    </Stack>
+  );
+}
+
+const TIMELINE_SKELETON_ROWS: Array<{
+  title: string;
+  indent?: boolean;
+  secondary?: string;
+}> = [
+  {title: '28%', secondary: '13%'},
+  {title: '26%', secondary: '12%', indent: true},
+  {title: '32%', indent: true},
+  {title: '24%', secondary: '20%', indent: true},
+  {title: '30%', secondary: '11%', indent: true},
+  {title: '33%', indent: true},
+  {title: '31%', secondary: '14%'},
+  {title: '28%', secondary: '15%', indent: true},
+];
+
+function TimelineSkeleton() {
+  return (
+    <Stack gap="xs">
+      {TIMELINE_SKELETON_ROWS.map((row, index) => (
+        <Container
+          key={`${row.title}-${index}`}
+          padding="xs"
+          paddingLeft={row.indent ? 'xl' : 'xs'}
+        >
+          <Stack gap="xs">
+            <Flex align="center" gap="md">
+              <Placeholder height="16px" width="16px" />
+              <Placeholder height="14px" width={row.title} />
+              {row.secondary ? <Placeholder height="14px" width={row.secondary} /> : null}
+              <Flex flex="1" minWidth="0" />
+              <Flex flexShrink={0} width="64px" justify="end">
+                <Placeholder height="14px" width="44px" />
+              </Flex>
+              <Flex flexShrink={0} width="44px" justify="end">
+                <Placeholder height="14px" width="36px" />
+              </Flex>
+            </Flex>
+            <Placeholder height="4px" width="100%" />
+          </Stack>
+        </Container>
+      ))}
     </Stack>
   );
 }
